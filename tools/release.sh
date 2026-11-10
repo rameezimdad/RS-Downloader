@@ -9,7 +9,7 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 NOTES="${1:-Fixes and improvements}"
-REPO=rameezimdad/RS-Downloader-Releases
+REPO=rameezimdad/RS-Downloader
 gh repo view "$REPO" >/dev/null 2>&1 || { echo "releases repo $REPO not found"; exit 1; }
 if [ -z "${NOBUMP:-}" ]; then
   V=$(node -e 'const fs=require("fs"),p=JSON.parse(fs.readFileSync("package.json"));const v=p.version.split(".").map(Number);v[2]++;p.version=v.join(".");fs.writeFileSync("package.json",JSON.stringify(p,null,2)+"\n");console.log(p.version)')

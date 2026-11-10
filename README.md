@@ -2,7 +2,7 @@
 
 **RS Downloader** is a free Windows desktop app that downloads videos, MP3 audio, pictures and files from YouTube, Instagram, TikTok, X (Twitter), Facebook, Pinterest, Reddit, Vimeo and 1,800+ other websites. It works like a classic download manager (similar to IDM): paste a link or click **Download this video** in your browser, pick the quality, and the file is saved to your PC. It is made by Rameez Scripts.
 
-**[Download RS Downloader for Windows (latest)](https://github.com/rameezimdad/RS-Downloader-Releases/releases/latest)** | **[Download the browser extension](https://github.com/rameezimdad/RS-Downloader-Releases/releases/latest/download/RS-Downloader-Extension.zip)**
+**[Download RS Downloader for Windows (latest)](https://github.com/rameezimdad/RS-Downloader/releases/latest)** | **[Download the browser extension](https://github.com/rameezimdad/RS-Downloader/releases/latest/download/RS-Downloader-Extension.zip)**
 
 ## Key facts
 
@@ -55,7 +55,7 @@
 
 ## Install the browser extension
 
-1. Download **[RS-Downloader-Extension.zip](https://github.com/rameezimdad/RS-Downloader-Releases/releases/latest/download/RS-Downloader-Extension.zip)** and unzip it.
+1. Download **[RS-Downloader-Extension.zip](https://github.com/rameezimdad/RS-Downloader/releases/latest/download/RS-Downloader-Extension.zip)** and unzip it.
 2. Open `chrome://extensions` (Edge: `edge://extensions`, Brave: `brave://extensions`) and turn on **Developer mode**.
 3. Click **Load unpacked** and select the `RS-Downloader-Extension` folder.
 
