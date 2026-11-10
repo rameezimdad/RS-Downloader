@@ -34,6 +34,8 @@ for root, _, files in os.walk('extension'):
 z.close()
 PY
 gh release create "v$V" -R "$REPO" --title "RS Downloader $V" --notes "$NOTES" --latest "$EXE" "$EXE.blockmap" dist/latest.yml dist/RS-Downloader-Extension.zip
+# source goes up with the release
+git add -A && { git diff --cached --quiet || git commit -q -m "v$V: $NOTES"; } && git push -q origin main || echo "source push failed, run: git push origin main"
 # dist keeps only the newest installer
 find dist -maxdepth 1 -name 'RS-Downloader-Setup-*' ! -name "RS-Downloader-Setup-$V.exe*" -delete
 echo "published v$V, installed apps update within an hour"

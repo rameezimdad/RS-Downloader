@@ -122,6 +122,25 @@ Yes. The Actions column shows Copy and Move for every connected USB drive, memor
 ### Which websites are supported?
 YouTube, Instagram, TikTok, X / Twitter, Facebook, Pinterest, Reddit, Vimeo, Threads, Twitch, SoundCloud, Dailymotion and the 1,800+ sites supported by yt-dlp, plus direct file links.
 
+## Source code
+
+The full source code of the app is in this repository.
+
+| Folder | What it holds |
+|---|---|
+| `src/` | The Electron app: `main.js` (engines, queue, downloads, updates), `preload.js` and the screens in `ui/` |
+| `extension/` | The browser extension |
+| `tools/` | Build and release scripts |
+
+Run it from source on Windows (Node.js needed):
+
+```
+npm install
+npm start
+```
+
+Build the installer with `npm run dist`. Run `bash tools/fetch-engines.sh` first so the engines are in `engines/`.
+
 ## Contact
 
 - WhatsApp: https://wa.me/923435347417
