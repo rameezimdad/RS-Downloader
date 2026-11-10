@@ -1,7 +1,7 @@
 {
   "name": "rs-downloader",
   "productName": "RS Downloader",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "description": "RS Downloader: save videos and MP3 from YouTube, X, Instagram, TikTok and 1,800+ sites, by Rameez Scripts (rameezscripts.com)",
   "author": "Rameez Scripts <Contact@rameezscripts.com>",
