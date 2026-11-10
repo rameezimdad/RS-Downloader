@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<!--
+  Developed by Mohammad Rameez Imdad (Rameez Scripts)
+  WhatsApp: https://wa.me/923435347417 (For Custom Projects)
+  YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'none'">
+  <title>Download</title>
+  <link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="progress.css">
+</head>
+<body>
+  <script src="boot-theme.js"></script>
+  <main class="pw">
+    <div class="pw-top">
+      <span class="pw-ico" id="ico"><i class="fa-solid fa-circle-down"></i></span>
+      <div class="pw-name"><b id="name">Connecting...</b><small id="url"></small></div>
+      <span class="pw-pct" id="pct">0%</span>
+    </div>
+
+    <!-- bar with size and time left written inside -->
+    <div class="pw-bar" id="bar"><span class="fill"></span><span class="txt" id="barTxt">Connecting...</span></div>
+    <div class="pw-segs" id="segs" hidden></div>
+
+    <div class="pw-line"><span id="status">Connecting...</span><span id="resume"></span></div>
+
+    <div class="pw-stats">
+      <div><span>Transfer rate</span><b id="rate">-</b></div>
+      <div><span>Time left</span><b id="left">-</b></div>
+      <div><span>Time taken</span><b id="took">0:00</b></div>
+      <div><span>Total time</span><b id="total">-</b></div>
+    </div>
+    <p class="pw-msg" id="msg" hidden></p>
+  </main>
+  <footer class="pw-foot" id="foot"></footer>
+  <script src="progress.js"></script>
+</body>
+</html>

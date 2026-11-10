@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<!--
+  Developed by Mohammad Rameez Imdad (Rameez Scripts)
+  WhatsApp: https://wa.me/923435347417 (For Custom Projects)
+  YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'none'">
+  <title>Download File Info</title>
+  <link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="fileinfo.css">
+</head>
+<body>
+  <script src="boot-theme.js"></script>
+  <div class="fi" id="fi">
+    <div class="fi-form">
+      <label class="l" for="fUrl">URL</label>
+      <div class="f"><input id="fUrl" readonly></div>
+
+      <label class="l">Quality</label>
+      <div class="f"><div class="dd" id="ddQ"></div></div>
+
+      <label class="l">Category</label>
+      <div class="f"><div class="dd" id="ddC"></div></div>
+
+      <label class="l" for="fSave">Save As</label>
+      <div class="f row"><input id="fSave" spellcheck="false"><button type="button" class="dots" id="fBrowse" title="Choose where to save" aria-label="Choose where to save">...</button></div>
+
+      <span class="l"></span>
+      <div class="f rem">
+        <label class="chk"><input type="checkbox" id="fRem"><span id="fRemTxt">Remember this path for "Video" category</span></label>
+        <input id="fCatDir" readonly tabindex="-1">
+      </div>
+
+      <label class="l" for="fDesc">Description</label>
+      <div class="f"><input id="fDesc" maxlength="200" placeholder="Optional note"></div>
+
+      <span class="l"></span>
+      <div class="f">
+        <button type="button" class="more" id="fMoreBtn"><i class="fa-solid fa-sliders"></i> More options <i class="fa-solid fa-caret-down"></i></button>
+        <div class="opts" id="fMore" hidden>
+          <div class="opt" id="oFmt"><span>Format</span><div class="seg" id="sFmt"><button type="button" data-v="mp4" class="on">MP4</button><button type="button" data-v="mkv">MKV</button></div></div>
+          <div class="opt" id="oSub"><label class="chk"><input type="checkbox" id="fSubs"><span>Subtitles (.srt)</span></label>
+            <div class="seg" id="sLang"><button type="button" data-v="en" class="on">English</button><button type="button" data-v="ur">Urdu</button><button type="button" data-v="hi">Hindi</button><button type="button" data-v="ar">Arabic</button><button type="button" data-v="all">All</button></div></div>
+          <div class="opt" id="oCut"><label class="chk"><input type="checkbox" id="fCut"><span>Only a part</span></label>
+            <input id="fFrom" class="t" placeholder="From 0:00" disabled><span>to</span><input id="fTo" class="t" placeholder="To end" disabled></div>
+        </div>
+      </div>
+    </div>
+
+    <aside class="fi-side">
+      <div class="pic" id="pic"><i class="fa-solid fa-file-video"></i></div>
+      <b id="sideMain">-</b>
+      <small id="sideSub"></small>
+    </aside>
+  </div>
+
+  <p class="fi-msg" id="msg" hidden></p>
+
+  <footer class="fi-foot">
+    <button type="button" class="btn" id="bLater"><i class="fa-solid fa-clock"></i> Download Later</button>
+    <button type="button" class="btn btn-primary" id="bGo"><i class="fa-solid fa-circle-down"></i> Start Download</button>
+    <button type="button" class="btn" id="bCancel">Cancel</button>
+  </footer>
+  <script src="fileinfo.js"></script>
+</body>
+</html>

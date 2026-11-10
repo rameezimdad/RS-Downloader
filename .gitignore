@@ -1,0 +1,5 @@
+node_modules/
+dist/
+engines/
+MEMORY.md
+tools/site-shots.mjs

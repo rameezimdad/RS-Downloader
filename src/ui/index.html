@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<!--
+  Developed by Mohammad Rameez Imdad (Rameez Scripts)
+  WhatsApp: https://wa.me/923435347417 (For Custom Projects)
+  YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; font-src 'self'; script-src 'self'; connect-src 'none'">
+  <title>RS Downloader</title>
+  <link rel="stylesheet" href="../../node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+  <link rel="stylesheet" href="../../node_modules/tabulator-tables/dist/css/tabulator.min.css">
+  <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="rspop.css">
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <script src="boot-theme.js"></script>
+  <div class="top-loadbar" id="loadbar" hidden><span></span></div>
+
+  <!-- menu bar -->
+  <nav class="menubar" id="menubar">
+    <img class="mb-logo" src="icon.png" alt="">
+    <button type="button" class="mb-item" data-menu="tasks">Tasks</button>
+    <button type="button" class="mb-item" data-menu="downloads">Downloads</button>
+    <button type="button" class="mb-item" data-menu="view">View</button>
+    <button type="button" class="mb-item" data-menu="help">Help</button>
+  </nav>
+
+  <!-- toolbar -->
+  <div class="toolbar">
+    <button type="button" class="tb-big" data-act="add" title="Add a new download (Ctrl+N)"><i class="fa-solid fa-circle-plus ic-accent"></i><span>Add URL</span></button>
+    <button type="button" class="tb-big" data-act="batch" title="Add many links at once (Ctrl+B)"><i class="fa-solid fa-layer-group ic-accent"></i><span>Batch</span></button>
+    <span class="tb-sep"></span>
+    <button type="button" class="tb-big" data-act="resume" id="tbResume" title="Resume selected" disabled><i class="fa-solid fa-play ic-success"></i><span>Resume</span></button>
+    <button type="button" class="tb-big" data-act="pause" id="tbPause" title="Pause selected" disabled><i class="fa-solid fa-pause ic-warn"></i><span>Pause</span></button>
+    <button type="button" class="tb-big" data-act="del" id="tbDel" title="Delete selected (Del)" disabled><i class="fa-solid fa-trash-can ic-danger"></i><span>Delete</span></button>
+    <span class="tb-sep"></span>
+    <button type="button" class="tb-big" data-act="open" id="tbOpen" title="Open file (Enter)" disabled><i class="fa-solid fa-circle-play ic-success"></i><span>Open</span></button>
+    <button type="button" class="tb-big" data-act="reveal" id="tbFolder" title="Show in folder" disabled><i class="fa-solid fa-folder-open ic-warn"></i><span>Folder</span></button>
+    <button type="button" class="tb-big" data-act="send" id="tbSend" title="Copy or move the selected downloads to a USB or phone" disabled><i class="fa-brands fa-usb ic-accent"></i><span>Send to USB</span></button>
+    <span class="tb-sep"></span>
+    <button type="button" class="tb-big" data-act="qstart" id="tbQStart" title="Start the queue"><i class="fa-solid fa-forward ic-success"></i><span>Start Queue</span></button>
+    <button type="button" class="tb-big" data-act="qstop" id="tbQStop" title="Stop the queue after the current download"><i class="fa-solid fa-hand ic-danger"></i><span>Stop Queue</span></button>
+    <button type="button" class="tb-big" data-act="sched" title="Scheduler"><i class="fa-solid fa-clock ic-accent"></i><span>Scheduler</span></button>
+    <span class="tb-sep"></span>
+    <button type="button" class="tb-big" data-act="options" title="Options"><i class="fa-solid fa-gear ic-muted"></i><span>Options</span></button>
+    <button type="button" class="tb-big" data-act="update" id="tbUpdate" title="Update"><i class="fa-solid fa-rotate ic-accent"></i><span>Update</span><em class="tb-dot" id="updDot" hidden></em></button>
+    <button type="button" class="tb-big" data-act="about" title="About RS Downloader"><i class="fa-solid fa-circle-info ic-accent"></i><span>About</span></button>
+  </div>
+
+  <!-- quick link bar -->
+  <div class="quickbar">
+    <div class="field" id="qField"><i class="fa-solid fa-link"></i><input id="qUrl" type="url" placeholder="Paste a video or picture link here and press Enter" autocomplete="off" spellcheck="false"><span class="chip" id="qSite" hidden></span></div>
+    <label class="toggle-row" id="qListRow" hidden><input type="checkbox" class="toggle" id="qList"><span><i class="fa-solid fa-list"></i> Whole playlist</span></label>
+    <button type="button" class="btn btn-primary" id="qGo"><i class="fa-solid fa-circle-down"></i> Download</button>
+    <div class="field field-sm q-search"><i class="fa-solid fa-magnifying-glass"></i><input id="fSearch" type="search" placeholder="Search downloads" autocomplete="off"></div>
+  </div>
+
+  <!-- categories + list -->
+  <div class="work">
+    <aside class="cats" id="cats" aria-label="Categories"></aside>
+    <section class="list-wrap"><div id="list"></div></section>
+  </div>
+
+  <!-- status bar -->
+  <footer class="statusbar">
+    <span id="sbCount"></span>
+    <span id="sbSpace"></span>
+    <button type="button" class="sb-ext" id="sbDev" title="USB and phones"></button>
+    <button type="button" class="sb-ext" id="sbExt" title="Browser extension"></button>
+    <span id="sbQueue"></span>
+    <span class="sb-path" id="sbPath"></span>
+    <span class="sb-end" id="sbVer"></span>
+  </footer>
+
+  <!-- copy / move to USB progress -->
+  <div class="xfers" id="xfers" aria-live="polite"></div>
+
+  <script src="../../node_modules/tabulator-tables/dist/js/tabulator.min.js"></script>
+  <script src="rspop.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

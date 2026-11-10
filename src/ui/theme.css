@@ -1,0 +1,120 @@
+/**
+ * Developed by Mohammad Rameez Imdad (Rameez Scripts)
+ * WhatsApp: https://wa.me/923435347417 (For Custom Projects)
+ * YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
+ */
+:root {
+  --navy-primary: #001f3f; --navy-dark: #001529; --navy-light: #003366; --navy-accent: #0074D9; --navy-hover: #002a52;
+  --navy-primary-rgb: 0, 31, 63; --navy-light-rgb: 0, 51, 102; --navy-accent-rgb: 0, 116, 217; --on-accent: #ffffff;
+  --success: #34a853; --warning: #fbbc04; --danger: #ea4335;
+  --bg-primary: #f5f5f5; --bg-secondary: #ffffff; --bg-card: #ffffff;
+  --text-primary: #333333; --text-secondary: #555555; --text-muted: #666666;
+  --border-color: #e0e0e0; --border-light: #f0f0f0; --shadow-color: rgba(0,0,0,.1); --shadow-hover: rgba(0,0,0,.15);
+  --input-bg: #ffffff; --input-border: #d0d0d0; --skeleton-base: #f0f0f0; --skeleton-shine: #e0e0e0;
+  --r-panel: 4px; --r-ctrl: 3px; --r-chip: 3px; --sb-r: 4px; /* squared default */
+}
+/* dark = neutral black, same values as the PHP template */
+body.dark-mode {
+  --bg-primary: #121212; --bg-secondary: #191919; --bg-card: #1e1e1e;
+  --text-primary: #eeeeee; --text-secondary: #bbbbbb; --text-muted: #8f8f8f;
+  --border-color: #333333; --border-light: #2a2a2a; --shadow-color: rgba(0,0,0,.3); --shadow-hover: rgba(0,0,0,.4);
+  --input-bg: #2a2a2a; --input-border: #3a3a3a; --skeleton-base: #262626; --skeleton-shine: #333333;
+  --navy-primary: #0a1628; --navy-dark: #060d16; --navy-light: #1a3a5c; --navy-primary-rgb: 10, 22, 40; --navy-light-rgb: 26, 58, 92;
+  color: var(--text-primary); color-scheme: dark;
+}
+body.dark-mode :is(h1, h2, h3, h4, h5, h6) { color: var(--text-primary); } /* navy text stays readable */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+.toggle { appearance: none; -webkit-appearance: none; width: 44px; height: 24px; border-radius: 24px; background: var(--input-border); position: relative; cursor: pointer; transition: background .3s; border: none; outline: none; vertical-align: middle; }
+.toggle:checked { background: var(--navy-accent); }
+.toggle::before { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform .3s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.toggle:checked::before { transform: translateX(20px); }
+
+.form-group .toggle, .toggle-row .toggle { width: 44px; min-width: 44px; max-width: 44px; height: 24px; min-height: 24px; max-height: 24px; flex: 0 0 44px; padding: 0; }
+/* Top Loading Bar — thin indeterminate bar, fixed top, non-blocking (keeps content visible) */
+.top-loadbar { position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10001; overflow: hidden; pointer-events: none; }
+.top-loadbar > span { display: block; height: 100%; width: 38%; border-radius: 0 3px 3px 0; background: linear-gradient(90deg, rgba(0,116,217,0), var(--navy-accent), var(--navy-primary)); box-shadow: 0 0 8px rgba(0,116,217,.5); animation: topLoadSlide 1.05s ease-in-out infinite; }
+@keyframes topLoadSlide { 0% { transform: translateX(-105%); } 100% { transform: translateX(320%); } }
+body.dark-mode .top-loadbar > span { background: linear-gradient(90deg, rgba(74,163,255,0), #4aa3ff, #9fd0ff); } /* dark mode is optional — only kicks in if the project ships a body.dark-mode theme */
+
+
+/* ===== Table (Tabulator) — navy skin, tokens only. Full pattern: datatable.md ===== */
+.tb-table { margin-top: 4px; }
+.tabulator { background: transparent; border: 1px solid var(--border-color); border-radius: var(--r-panel); font-size: 13px; overflow: hidden; }
+.tabulator .tabulator-header { background: var(--navy-primary); border-bottom: 0; color: #fff; font-weight: 600; }
+.tabulator .tabulator-header .tabulator-col { background: transparent; border-right: 1px solid rgba(255,255,255,.10); }
+.tabulator .tabulator-header .tabulator-col-title { font-size: 12.5px; letter-spacing: .3px; padding: 12px 10px; }
+.tabulator .tabulator-header .tabulator-col.tabulator-sortable:hover { background: rgba(255,255,255,.08); }
+.tabulator .tabulator-header .tabulator-col .tabulator-arrow { border-bottom-color: rgba(255,255,255,.6) !important; }
+.tabulator .tabulator-row { border-bottom: 1px solid var(--border-light); background: var(--bg-card); }
+.tabulator .tabulator-row.tabulator-row-even { background: color-mix(in srgb, var(--navy-accent) 2%, var(--bg-card)); }
+.tabulator .tabulator-row:hover { background: color-mix(in srgb, var(--navy-accent) 5%, var(--bg-card)); }
+.tabulator .tabulator-row.tabulator-selected { background: color-mix(in srgb, var(--navy-accent) 10%, var(--bg-card)); }
+.tabulator .tabulator-cell { border-right: 0; padding: 11px 10px; color: var(--text-primary); }
+.tabulator .tabulator-footer { background: var(--bg-card); border-top: 1px solid var(--border-color); color: var(--text-secondary); padding: 8px 10px; }
+.tabulator .tabulator-footer .tabulator-page { border: 1px solid var(--border-color); background: var(--bg-card); color: var(--text-primary); font-size: 12.5px; padding: 5px 10px; border-radius: var(--r-ctrl); }
+.tabulator .tabulator-footer .tabulator-page.active { background: var(--navy-accent); color: var(--on-accent, #fff); border-color: var(--navy-accent); }
+.tabulator .tabulator-footer .tabulator-page:disabled { opacity: .45; }
+.tabulator .tabulator-placeholder .tabulator-placeholder-contents { color: var(--text-muted); font-size: 13px; }
+
+/* identity cell + pills */
+.tb-user { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.tb-ava { flex: 0 0 32px; width: 32px; height: 32px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center;
+          background: var(--navy-accent); color: var(--on-accent, #fff); font-size: 11.5px; font-weight: 700; letter-spacing: .3px; }
+.tb-uid { min-width: 0; line-height: 1.3; }
+.tb-uid b { display: block; font-size: 13px; color: var(--text-primary); overflow: hidden; text-overflow: ellipsis; }
+.tb-uid small { display: block; font-size: 11.5px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; }
+.tb-pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: var(--r-chip); font-size: 11.5px; font-weight: 700; }
+.tb-pill i { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+.tb-pill.role { background: color-mix(in srgb, var(--navy-accent) 14%, transparent); color: var(--navy-accent); }
+.tb-pill.ok { background: color-mix(in srgb, var(--success) 14%, transparent); color: color-mix(in srgb, var(--success) 75%, var(--text-primary)); }
+.tb-pill.off { background: color-mix(in srgb, var(--danger) 13%, transparent); color: var(--danger); }
+.tb-na { color: var(--text-muted); }
+
+/* filter toolbar — renders in the page header's second tier (dashboard.md § "Second Tier"), never inside the table card */
+.tb-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+              padding: 10px; margin-bottom: 10px; background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--r-panel); }
+.tb-tools { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tb-search, .tb-sel { position: relative; display: flex; align-items: center; }
+.tb-search > i, .tb-sel > i { position: absolute; left: 12px; font-size: 13px; color: var(--text-muted); pointer-events: none; }
+.tb-search input, .tb-sel select { height: 38px; padding: 0 12px 0 34px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);
+  font-family: inherit; font-size: 13px !important; font-weight: 500; border-radius: var(--r-ctrl); transition: border-color .2s, box-shadow .2s; }
+.tb-search input { width: 262px; }
+.tb-sel select { padding-right: 28px; cursor: pointer; min-width: 140px; }
+.tb-search input:focus, .tb-sel select:focus { outline: none; border-color: var(--navy-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--navy-accent) 14%, transparent); }
+.tb-tbtn { display: inline-flex; align-items: center; gap: 7px; height: 38px; padding: 0 13px; border: 1px solid var(--border-color); background: var(--bg-card);
+           color: var(--text-primary); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; border-radius: var(--r-ctrl); transition: all .18s; }
+.tb-tbtn:hover { border-color: var(--navy-accent); color: var(--navy-accent); }
+.tb-tbtn.ghost { border-style: dashed; color: var(--text-muted); width: 100%; justify-content: center; margin-top: 4px; }
+.tb-dot { min-width: 17px; height: 17px; padding: 0 5px; display: inline-flex; align-items: center; justify-content: center;
+          background: var(--navy-accent); color: var(--on-accent, #fff); font-size: 10px; font-weight: 700; border-radius: var(--r-chip); }
+
+/* shared popover shell — More Filters + Columns */
+.tb-pop { position: relative; }
+.tb-pop-menu { position: absolute; right: 0; top: calc(100% + 6px); min-width: 200px; background: var(--bg-card); border: 1px solid var(--border-color);
+               box-shadow: 0 10px 28px var(--shadow-hover); border-radius: var(--r-panel); padding: 10px; z-index: 400; display: none; }
+.tb-pop.open .tb-pop-menu { display: block; }
+.tb-pop-h { font-size: 10.5px; font-weight: 700; letter-spacing: .6px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+.tb-pop-menu label { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 5px 2px; font-size: 12.5px; font-weight: 600; color: var(--text-secondary); }
+.tb-pop-menu label.tb-chk { justify-content: flex-start; gap: 9px; padding: 7px 8px; font-size: 13px; cursor: pointer; border-radius: var(--r-ctrl); }
+.tb-pop-menu label.tb-chk:hover { background: color-mix(in srgb, var(--navy-accent) 6%, var(--bg-card)); }
+.tb-pop-menu input[type="date"] { height: 32px; padding: 0 8px; border: 1px solid var(--input-border); background: var(--input-bg); color: var(--text-primary);
+                                  font-family: inherit; font-size: 13px !important; border-radius: var(--r-ctrl); }
+.tb-pop-menu input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--navy-accent); cursor: pointer; }
+
+/* bulk action bar — always visible, disabled at 0 selected */
+.tb-bar { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+          padding: 9px 12px; margin-bottom: 10px; background: color-mix(in srgb, var(--navy-accent) 4%, var(--bg-card)); border: 1px solid var(--border-color); border-radius: var(--r-panel); }
+.tb-count { font-size: 12.5px; color: var(--text-muted); font-weight: 600; }
+.tb-bulk { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.tb-all { width: 16px; height: 16px; accent-color: var(--navy-accent); cursor: pointer; }
+.tb-bulk-n { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 700; color: var(--navy-primary); margin-right: 4px; }
+.tb-bulk-btn { display: inline-flex; align-items: center; gap: 7px; padding: 7px 12px; border: 1px solid var(--border-color); background: var(--bg-card);
+               color: var(--text-primary); font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer; border-radius: var(--r-ctrl); transition: all .18s; }
+.tb-bulk-btn:hover { border-color: var(--navy-accent); color: var(--navy-accent); }
+.tb-bulk-btn.ok { background: color-mix(in srgb, var(--success) 10%, var(--bg-card)); border-color: color-mix(in srgb, var(--success) 30%, transparent); color: color-mix(in srgb, var(--success) 75%, var(--text-primary)); }
+.tb-bulk-btn.warn { background: color-mix(in srgb, var(--warning) 14%, var(--bg-card)); border-color: color-mix(in srgb, var(--warning) 40%, transparent); color: color-mix(in srgb, var(--warning) 45%, var(--text-primary)); }
+.tb-bulk-btn.danger { background: color-mix(in srgb, var(--danger) 7%, var(--bg-card)); border-color: color-mix(in srgb, var(--danger) 35%, transparent); color: var(--danger); }
+.tb-bulk-btn.info { background: color-mix(in srgb, var(--navy-accent) 10%, transparent); border-color: color-mix(in srgb, var(--navy-accent) 30%, transparent); color: var(--navy-accent); }
+.tb-bulk-btn:disabled { opacity: .45; cursor: not-allowed; }
+.tb-bulk-btn:disabled:hover { border-color: var(--border-color); }
+
