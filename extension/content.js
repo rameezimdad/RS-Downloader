@@ -77,6 +77,10 @@
     @keyframes r{to{transform:rotate(360deg)}}
   </style><div class="wrap"><div class="bar"><span class="go" title="Pick a quality and download with RS Downloader"><svg width="15" height="15" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="11" fill="#0074D9"/><path d="M11 6h2v6.6l2.3-2.3 1.4 1.4L12 16.4l-4.7-4.7 1.4-1.4 2.3 2.3z" fill="#fff"/><path d="M7.5 17.5h9v1.6h-9z" fill="#fff"/></svg><span class="t">Download this video</span><svg width="9" height="9" viewBox="0 0 10 10" aria-hidden="true"><path d="M1 3l4 4 4-4" fill="none" stroke="#0b4f96" stroke-width="1.8"/></svg></span><span class="x" title="Hide for this video">&times;</span></div><div class="menu" role="menu"></div></div>`
   const label = sh.querySelector('.t'), menu = sh.querySelector('.menu'), bar = sh.querySelector('.bar')
+  const T = (...a) => globalThis.RST ? RST.T(...a) : a[0]
+  // bar text in the app language (read once the language is known)
+  const words = () => { label.textContent = T('Download this video'); sh.querySelector('.go').title = T('Pick a quality and download with RS Downloader'); sh.querySelector('.x').title = T('Hide for this video') }
+  globalThis.RST?.ready().then(words)
   ;(document.body || document.documentElement).append(host)
 
   function place() {
@@ -91,7 +95,7 @@
   function showFor(v, ms) {
     if (!on || hidden.has(v) || (open && v !== cur)) return
     clr()
-    if (cur !== v) { cur = v; label.textContent = 'Download this video' }
+    if (cur !== v) { cur = v; words() }
     raf || (raf = requestAnimationFrame(loop))
     ms && (hideT = setTimeout(() => hide(), ms))
   }
@@ -143,32 +147,32 @@
   function closeMenu() { open = false; menu.classList.remove('on'); menu.innerHTML = '' }
   async function openMenu() {
     if (!cur) return
-    if (!alive()) { label.textContent = 'Refresh the page'; return }
+    if (!alive()) { label.textContent = T('Refresh the page'); return }
     const url = urlFor(cur), id = ++req
     open = true
-    menu.innerHTML = '<div class="msg"><span class="spin"></span>Reading the available qualities...</div>'
+    menu.innerHTML = `<div class="msg"><span class="spin"></span>${esc(T('Reading the available qualities...'))}</div>`
     menu.classList.add('on'); fit()
-    const slow = setTimeout(() => id === req && open && (menu.innerHTML = '<div class="msg"><span class="spin"></span>Still reading... long videos and slow sites take a little longer.</div>'), 12000)
+    const slow = setTimeout(() => id === req && open && (menu.innerHTML = `<div class="msg"><span class="spin"></span>${esc(T('Still reading... long videos and slow sites take a little longer.'))}</div>`), 12000)
     const r = await Promise.race([qualities(url), new Promise(res => setTimeout(() => res({ok: false, msg: 'This took too long. Try again, or open the video page itself.'}), 75000))])
     clearTimeout(slow)
     if (id !== req || !open) return
-    if (!r.ok) { menu.innerHTML = `<div class="msg">${esc(r.msg || 'Could not read this video.')}</div>`; return fit() }
+    if (!r.ok) { menu.innerHTML = `<div class="msg">${esc(T(r.msg || 'Could not read this video.'))}</div>`; return fit() }
     const list = r.choices
     menu.innerHTML = `<div class="hd" title="${esc(r.info.title)}">${esc(r.info.title)}</div>` + list.map((c, i) =>
-      `${i && c.kind !== list[i - 1].kind ? '<div class="sep"></div>' : ''}<div class="it" role="menuitem" data-i="${i}"><span class="n">${i + 1}.</span><span class="q">${esc(c.label)}</span><span class="k">${KIND[c.kind] || ''}</span>${i === 0 && c.kind === 'video' ? '<span class="best">BEST</span>' : ''}<span class="s">${c.size ? '~' + fmtB(c.size) : ''}</span></div>`).join('')
-      + '<div class="sep"></div><div class="it more" role="menuitem" data-more="1">More options in RS Downloader...</div>'
+      `${i && c.kind !== list[i - 1].kind ? '<div class="sep"></div>' : ''}<div class="it" role="menuitem" data-i="${i}"><span class="n">${i + 1}.</span><span class="q">${esc(T(c.label))}</span><span class="k">${esc(T(KIND[c.kind] || ''))}</span>${i === 0 && c.kind === 'video' ? `<span class="best">${esc(T('BEST'))}</span>` : ''}<span class="s">${c.size ? '~' + fmtB(c.size) : ''}</span></div>`).join('')
+      + `<div class="sep"></div><div class="it more" role="menuitem" data-more="1">${esc(T('More options in RS Downloader...'))}</div>`
     menu.onclick = e => {
       const it = e.target.closest('.it')
       if (!it) return
       closeMenu()
-      if (it.dataset.more) return chrome.runtime.sendMessage({type: 'add', url}).catch(() => {}).then(x => flash(x?.ok ? 'Opened in RS Downloader' : 'Open RS Downloader first'))
+      if (it.dataset.more) return chrome.runtime.sendMessage({type: 'add', url}).catch(() => {}).then(x => flash(T(x?.ok ? 'Opened in RS Downloader' : 'Open RS Downloader first')))
       const c = list[+it.dataset.i]
-      label.textContent = `Starting ${c.label}...`
-      chrome.runtime.sendMessage({type: 'grab', url, label: c.label, kind: c.kind}).catch(() => null).then(x => flash(x?.ok ? `Downloading ${c.label}` : 'Open RS Downloader first'))
+      label.textContent = T('Starting {0}...', T(c.label))
+      chrome.runtime.sendMessage({type: 'grab', url, label: c.label, kind: c.kind}).catch(() => null).then(x => flash(x?.ok ? T('Downloading {0}', T(c.label)) : T('Open RS Downloader first')))
     }
     fit()
   }
-  const flash = t => { label.textContent = t; setTimeout(() => (label.textContent = 'Download this video'), 3000) }
+  const flash = t => { label.textContent = t; setTimeout(words, 3000) }
 
   bar.addEventListener('click', e => {
     if (!cur) return

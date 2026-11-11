@@ -4,8 +4,15 @@
  * YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
  */
 const $ = id => document.getElementById(id)
-const say = (t, cls) => { $('st').textContent = t; $('dot').className = 'dot ' + (cls || '') }
+const T = RST.T
+const say = (t, cls) => { $('st').textContent = T(t); $('dot').className = 'dot ' + (cls || '') }
 
+// static text in the app language, then the live check
+RST.ready().then(() => {
+  document.documentElement.dir = RST.rtl() ? 'rtl' : 'ltr'
+  document.querySelectorAll('#st, #page, #go, .tg span, .hint').forEach(e => (e.textContent = T(e.textContent.trim())))
+  $('url').placeholder = T($('url').placeholder)
+})
 chrome.runtime.sendMessage({type: 'ping'}, r => r?.ok
   ? say('Connected to RS Downloader on this PC.', 'ok')
   : say('RS Downloader is not running. Open the app, then try again.', 'bad'))

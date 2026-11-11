@@ -12,6 +12,7 @@ const http = require('node:http')
 const {spawn} = require('node:child_process')
 const {Readable} = require('node:stream')
 const {pipeline} = require('node:stream/promises')
+const I18N = require('./i18n/i18n.js')
 
 const WIN = process.platform === 'win32'
 const ARM = process.arch === 'arm64'
@@ -67,7 +68,9 @@ const hdrs = new Map()   // url / qid -> browser headers for that file (memory o
 const jf = n => path.join(app.getPath('userData'), n + '.json')
 const jread = (n, d) => { try { return JSON.parse(fs.readFileSync(jf(n), 'utf8')) } catch { return d } }
 const jwrite = (n, v) => { try { fs.writeFileSync(jf(n), JSON.stringify(v, null, 1)) } catch {} }
-const cfg = () => ({outDir: app.getPath('downloads'), theme: 'light', rate: '', sort: true, clip: true, tray: true, notify: true, sched: {on: false, time: '02:00'}, maxAt: 2, conns: 16, progressWin: true, catDirs: {}, ...jread('settings', {})})
+// first run: the Windows language when the app has it
+const sysLang = () => { try { const l = app.getLocale().slice(0, 2).toLowerCase(); return I18N.ok(l) ? l : 'en' } catch { return 'en' } }
+const cfg = () => ({outDir: app.getPath('downloads'), theme: 'light', lang: sysLang(), rate: '', sort: true, clip: true, tray: true, notify: true, sched: {on: false, time: '02:00'}, maxAt: 2, conns: 16, progressWin: true, catDirs: {}, ...jread('settings', {})})
 const send = (ch, v) => win && !win.isDestroyed() && win.webContents.send(ch, v)
 const show = () => { if (!win) return; win.isMinimized() && win.restore(); win.show(); win.focus() }
 
@@ -643,14 +646,14 @@ async function finish(it, res) {
     const pw = pwins.has(it.qid)
     pwSend(it.qid, 'pw:done', {rec: res.rec, warn: res.warn})
     send('dl:done', {qid: it.qid, rec: res.rec, warn: res.warn, showDone: it.showDone && !pw})
-    win?.isFocused() || notify('Download complete', res.rec.title, () => { show(); res.rec.file ? shell.showItemInFolder(res.rec.file) : shell.openPath(res.rec.folder) })
+    win?.isFocused() || notify(L('Download complete'), res.rec.title, () => { show(); res.rec.file ? shell.showItemInFolder(res.rec.file) : shell.openPath(res.rec.folder) })
   } else if (res.paused) { Object.assign(it, {status: 'paused', dests: res.dests}); pwSend(it.qid, 'pw:state', {status: 'paused'}) }
   else if (res.cancelled) { queue.splice(i, 1); hdrs.delete(it.qid); pwins.get(it.qid)?.close() }
   else {
     Object.assign(it, {status: 'failed', err: res.msg, dests: res.dests || []})
     pwSend(it.qid, 'pw:state', {status: 'failed', err: res.msg})
     send('dl:failed', {qid: it.qid, msg: res.msg, title: it.title})
-    win?.isFocused() || notify('Download failed', `${it.title}: ${res.msg}`, show)
+    win?.isFocused() || notify(L('Download failed'), `${it.title}: ${L(res.msg)}`, show)
   }
   saveQ(); sendQ()
 }
@@ -837,7 +840,8 @@ const extInfo = () => (ext ||= jread('extension', {seen: 0, browser: '', version
 // local bridge: only an extension (chrome-/moz-/edge-extension origin + our header) is let in
 function startBridge() {
   const srv = http.createServer((req, res) => {
-    const out = (code, v) => { res.writeHead(code, {'Content-Type': 'application/json'}); res.end(JSON.stringify(v)) }
+    // the extension shows these messages as they come, so they go out in the app language
+    const out = (code, v) => { res.writeHead(code, {'Content-Type': 'application/json'}); res.end(JSON.stringify(v?.msg ? {...v, msg: L(v.msg)} : v)) }
     if (!/^(chrome|moz|edge|safari-web)-extension:\/\//.test(req.headers.origin || '') || req.headers['x-rs-downloader'] !== '1') return out(403, {ok: false})
     const q = new URL(req.url, 'http://x')
     const first = !extInfo().seen
@@ -847,7 +851,7 @@ function startBridge() {
     ext.browsers = {...(ext.browsers || {}), [bn]: {seen: ext.seen, version: ext.version}}
     jwrite('extension', ext)
     ;(first || newB) && send('ext:status', {...extState(), added: bn})
-    if (req.method === 'GET' && q.pathname === '/ping') return out(200, {ok: true, app: 'RS Downloader', version: app.getVersion(), clip: cfg().clip})
+    if (req.method === 'GET' && q.pathname === '/ping') return out(200, {ok: true, app: 'RS Downloader', version: app.getVersion(), clip: cfg().clip, lang: cfg().lang})
     if (req.method !== 'POST' || !['/add', '/probe'].includes(q.pathname)) return out(404, {ok: false})
     let body = ''
     req.setEncoding('utf8')
@@ -878,6 +882,8 @@ function startBridge() {
 }
 
 // ipc
+// native text (tray, notifications, dialogs) in the app language
+const L = (s, ...a) => a.length ? I18N.t(cfg().lang, s, ...a) : I18N.tr(cfg().lang, s)
 const H = (ch, fn) => ipcMain.handle(ch, async (_e, a) => { try { return await fn(a ?? {}) } catch (e) { return {ok: false, msg: e.message} } })
 const busyQ = () => queue.some(x => x.status === 'running')
 
@@ -946,7 +952,7 @@ H('q:cancel', async ({qids}) => {
 H('q:run', async ({on}) => { qRun = !!on; sendQ(); on && pump(); return {ok: true} })
 H('set', async ({key, value}) => {
   const bool = v => typeof v === 'boolean'
-  const ok = {theme: v => ['light', 'dark'].includes(v), rate: v => RATES.includes(v), sort: bool, clip: bool, tray: bool, notify: bool, progressWin: bool,
+  const ok = {lang: v => I18N.ok(v), theme: v => ['light', 'dark'].includes(v), rate: v => RATES.includes(v), sort: bool, clip: bool, tray: bool, notify: bool, progressWin: bool,
     sched: v => v && bool(v.on) && /^\d{2}:\d{2}$/.test(v.time), maxAt: v => [1, 2, 3].includes(v), conns: v => [4, 8, 16].includes(v), startup: bool}[key]
   if (!ok?.(value)) return {ok: false}
   // start with Windows: opens quietly in the tray
@@ -962,7 +968,7 @@ H('cat-dir', async ({cat, pick}) => {
   const c = cfg()
   let dir = ''
   if (pick) {
-    const r = await dialog.showOpenDialog(win, {title: `Folder for ${cat}`, defaultPath: catDir(c, cat), properties: ['openDirectory', 'createDirectory']})
+    const r = await dialog.showOpenDialog(win, {title: L('Folder for {0}', L(cat)), defaultPath: catDir(c, cat), properties: ['openDirectory', 'createDirectory']})
     if (r.canceled || !r.filePaths[0]) return {ok: false}
     dir = r.filePaths[0]
   }
@@ -972,7 +978,7 @@ H('cat-dir', async ({cat, pick}) => {
   return {ok: true, dir: catDir(cfg(), cat), custom: !!dir}
 })
 H('pick-folder', async () => {
-  const r = await dialog.showOpenDialog(win, {title: 'Save downloads in', defaultPath: cfg().outDir, properties: ['openDirectory', 'createDirectory']})
+  const r = await dialog.showOpenDialog(win, {title: L('Save downloads in'), defaultPath: cfg().outDir, properties: ['openDirectory', 'createDirectory']})
   if (r.canceled || !r.filePaths[0]) return {ok: false}
   jwrite('settings', {...jread('settings', {}), outDir: r.filePaths[0]})
   return {ok: true, outDir: r.filePaths[0]}
@@ -1016,7 +1022,7 @@ const extState = () => { const e = extInfo(), age = Date.now() - e.seen
 // Download File Info: one window for every new download (app, browser menu, right-click, caught downloads)
 const finfo = new Set()
 function openInfo(u, preset = {}, playlist = false) {
-  const w = new BrowserWindow({width: 760, height: 480, minWidth: 600, minHeight: 420, title: 'Download File Info', icon: ICON, autoHideMenuBar: true, maximizable: false, fullscreenable: false,
+  const w = new BrowserWindow({width: 760, height: 480, minWidth: 600, minHeight: 420, title: L('Download File Info'), icon: ICON, autoHideMenuBar: true, maximizable: false, fullscreenable: false,
     alwaysOnTop: true, backgroundColor: cfg().theme === 'dark' ? '#1e1e1e' : '#ffffff', webPreferences: {preload: path.join(__dirname, 'preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true}})
   w.removeMenu()
   w.webContents.setWindowOpenHandler(() => ({action: 'deny'}))
@@ -1040,7 +1046,7 @@ function openInfo(u, preset = {}, playlist = false) {
 H('fi:open', async ({url, playlist, name}) => { const u = okUrl(url); if (!u) return {ok: false, msg: 'Not a link.'}; openInfo(u, {name: name || ''}, !!playlist); return {ok: true} })
 H('fi:browse', async ({file}) => {
   const w = BrowserWindow.getFocusedWindow() || win
-  const r = await dialog.showSaveDialog(w, {title: 'Save As', defaultPath: typeof file === 'string' ? file : cfg().outDir})
+  const r = await dialog.showSaveDialog(w, {title: L('Save As'), defaultPath: typeof file === 'string' ? file : cfg().outDir})
   return r.canceled || !r.filePath ? {ok: false} : {ok: true, file: r.filePath}
 })
 H('fi:go', async a => {
@@ -1140,7 +1146,7 @@ function watchClipboard() {
     lastClip = t
     if (t.length > 2000 || !CLIP_RE.test(t)) return
     send('clip:link', t)
-    win?.isFocused() || notify('Link copied', 'Click to download it with RS Downloader', () => { show(); send('clip:open', t) })
+    win?.isFocused() || notify(L('Link copied'), L('Click to download it with RS Downloader'), () => { show(); send('clip:open', t) })
   }, 1200)
 }
 
@@ -1154,19 +1160,19 @@ setInterval(() => {
   firedOn = d.toDateString()
   if (!queue.some(x => x.status === 'queued')) return
   qRun = true; sendQ(); pump()
-  notify('Scheduled downloads started', `${queue.filter(x => x.status === 'queued').length} in the queue`, show)
+  notify(L('Scheduled downloads started'), L('{0} in the queue', queue.filter(x => x.status === 'queued').length), show)
 }, 20000)
 
 function makeTray() {
   tray = new Tray(nativeImage.createFromPath(ICON).resize({width: 16, height: 16}))
   tray.setToolTip('RS Downloader')
   const menu = () => Menu.buildFromTemplate([
-    {label: 'Open RS Downloader', click: show},
-    {label: 'Download link from clipboard', click: async () => { show(); send('clip:open', await clipText()) }},
+    {label: L('Open RS Downloader'), click: show},
+    {label: L('Download link from clipboard'), click: async () => { show(); send('clip:open', await clipText()) }},
     {type: 'separator'},
-    {label: qRun ? 'Stop queue' : 'Start queue', click: () => { qRun = !qRun; sendQ(); qRun && pump() }},
+    {label: L(qRun ? 'Stop queue' : 'Start queue'), click: () => { qRun = !qRun; sendQ(); qRun && pump() }},
     {type: 'separator'},
-    {label: 'Quit', click: () => { quitting = true; app.quit() }},
+    {label: L('Quit'), click: () => { quitting = true; app.quit() }},
   ])
   tray.on('click', show)
   tray.on('right-click', () => tray.popUpContextMenu(menu()))
@@ -1186,7 +1192,7 @@ function createWindow() {
   win.on('close', e => {
     if (quitting || !tray || cfg().tray === false) return
     e.preventDefault(); win.hide()
-    told || notify('RS Downloader is still running', 'Downloads continue in the background. Right-click the tray icon to quit.')
+    told || notify(L('RS Downloader is still running'), L('Downloads continue in the background. Right-click the tray icon to quit.'))
     told = true
   })
   win.loadFile(path.join(__dirname, 'ui', 'index.html'))

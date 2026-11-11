@@ -12,6 +12,7 @@ const fmtB2 = n => { if (!n) return ''; const u = ['Bytes', 'KB', 'MB', 'GB', 'T
 const fmtT = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = String(s % 60).padStart(2, '0'); return h ? `${h}:${String(m).padStart(2, '0')}:${x}` : `${m}:${x}` }
 const fmtD = iso => new Date(iso).toLocaleString(undefined, {day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit'})
 const ls = (k, v) => { try { return v === undefined ? localStorage.getItem(k) : localStorage.setItem(k, v) } catch { return null } }
+const raw = s => RSI18N.raw(String(s ?? '')) // names / titles stay as they are
 const LOGO = 'https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEiGXxCe0WNNedmFqSWeF761f7Kshhc-NP5ChRQKz9fr97cO8VaarvD0KlCwqHojJVBWv-RAxfOqMI5rD4H78KnARyOc6QgwL1nRRFWf5xNQ1d9F9HfAoLPPGlTyP0GwNl4n-INMEsWLQ4Y7zJtz5bOdAnc2ePH9-uCRgshlo6BsS6gJEz6fhrxL-5U5O3sX/s160/channels4_profile.jpg'
 
 const SITES = [['YouTube', 'fa-brands fa-youtube', ['youtube.com', 'youtu.be']], ['X / Twitter', 'fa-brands fa-x-twitter', ['x.com', 'twitter.com']],
@@ -231,7 +232,7 @@ window.rs.on('dl:stage', p => prog(p.qid, {stage: true, status: 'Finishing (join
 window.rs.on('dl:done', async p => {
   delete S.prog[p.qid]
   await loadRows()
-  p.showDone && document.hasFocus() ? done(p.rec, p.warn) : rsOk(`Saved: ${p.rec.title}`)
+  p.showDone && document.hasFocus() ? done(p.rec, p.warn) : rsOk(t('Saved: {0}', p.rec.title))
 })
 window.rs.on('dl:failed', p => { delete S.prog[p.qid]; rsErr(p.msg, 'Download failed') })
 window.rs.on('queue:changed', q => {
@@ -241,7 +242,7 @@ window.rs.on('queue:changed', q => {
 
 function done(rec, warn) {
   const d = dlg({title: 'Download complete', icon: 'fa-circle-check', width: 560, body: `
-    <div class="pd-top"><i class="fa-solid fa-circle-check ok"></i><b>${esc(rec.title)}</b></div>
+    <div class="pd-top"><i class="fa-solid fa-circle-check ok"></i><b translate="no">${esc(rec.title)}</b></div>
     <div class="kv"><span>Saved</span><span>${rec.kind === 'image' ? `${rec.count} picture${rec.count > 1 ? 's' : ''}` : rec.count > 1 ? `${rec.count} files` : esc(rec.label)}</span>
       <span>Size</span><span>${fmtB(rec.size) || '-'}</span><span>Location</span><span>${esc(rec.file || rec.folder)}</span></div>
     ${warn ? `<p class="muted"><i class="fa-solid fa-triangle-exclamation"></i> ${esc(warn)}</p>` : ''}`,
@@ -294,7 +295,7 @@ function buildTable() {
     rowContextMenu: rowMenu,
     columns: [
       {title: 'File Name', field: 'title', minWidth: 150, widthGrow: 4, formatter: c => { const d = c.getRow().getData(), k = iconOf(d)
-        return `<div class="fn"><i class="fa-solid ${k[0]} ${k[1]}"></i><span class="fn-t" title="${esc([d.title, d.kind === 'image' ? (d.count > 1 ? d.count + ' pictures' : 'Picture') : d.label, d.site, d.desc].filter(Boolean).join(' · '))}">${esc(d.title)}</span></div>` }},
+        return `<div class="fn"><i class="fa-solid ${k[0]} ${k[1]}"></i><span class="fn-t" translate="no" title="${esc([d.title, d.kind === 'image' ? (d.count > 1 ? d.count + ' pictures' : 'Picture') : d.label, d.site, d.desc].filter(Boolean).join(' · '))}">${esc(d.title)}</span></div>` }},
       {title: 'Size', field: 'size', width: 92, hozAlign: 'right', sorter: 'number', formatter: c => fmtB2(c.getValue())},
       {title: 'Status', field: 'qs', width: 120, headerSort: false, formatter: c => statusOf(c.getRow().getData())},
       {title: 'Time left', field: 'eta', width: 90, headerSort: false, formatter: c => c.getRow().getData().qs === 'running' && c.getValue() != null ? fmtT(c.getValue()) : ''},
@@ -375,7 +376,7 @@ async function sendTo(ids, mode, anchor, devId) {
   if (!S.devs.length) return rsErr('Plug in a USB, SD card or phone. For a phone, unlock it and choose File transfer.', 'No USB or phone found')
   const go = async d => {
     const rows = S.rows.filter(x => ids.includes(x.id)), size = rows.reduce((t, x) => t + (x.size || 0), 0)
-    if (mode === 'move' && !(await rsPop.confirm({title: `Move to ${devShort(d)}?`, text: `**${rows.length === 1 ? rows[0].title : rows.length + ' downloads'}** (${fmtB(size) || '?'}) will be copied to ${devLong(d)}, then removed from this PC.`, yes: 'Move'}))) return
+    if (mode === 'move' && !(await rsPop.confirm({title: `Move to ${devShort(d)}?`, text: t('**{0}** ({1}) will be copied to {2}, then removed from this PC.', rows.length === 1 ? raw(rows[0].title) : t('{0} downloads', rows.length), fmtB(size) || '?', devLong(d)), yes: 'Move'}))) return
     const r = await call('xfer', {ids, dev: d.id, mode})
     if (!r.ok) return rsErr(r.msg, 'Not sent')
     S.xf[r.tid] = {mode, dev: devShort(d), title: rows.length === 1 ? rows[0].title : `${rows.length} downloads`}
@@ -391,7 +392,7 @@ function drawXf(tid, p) {
   if (!el) {
     el = document.createElement('div'); el.className = 'xf'; el.id = 'xf-' + tid
     el.innerHTML = `<div class="xf-h"><i class="fa-brands fa-usb"></i><b></b><button type="button" class="xf-x" title="Cancel" aria-label="Cancel"><i class="fa-solid fa-xmark"></i></button></div>
-      <div class="xf-t"></div><div class="bar"><span></span></div><div class="xf-s"></div>`
+      <div class="xf-t" translate="no"></div><div class="bar"><span></span></div><div class="xf-s"></div>`
     el.querySelector('.xf-x').addEventListener('click', () => call('xfer:cancel', {tid}))
     $('xfers').append(el)
   }
@@ -428,7 +429,7 @@ function extText(x, long) {
     : x.state === 'idle' ? `<span class="pill pill-pause"><i class="fa-solid fa-plug"></i>Installed, browser closed</span>` : `<span class="pill pill-miss"><i class="fa-solid fa-plug-circle-xmark"></i>Not installed</span>`
   if (!long) return tag
   const who = x.browser ? ` ${esc(x.browser)}${x.version ? ' · extension v' + esc(x.version) : ''}${x.state === 'idle' ? ' · last seen ' + ago(x.seen) : ''}` : ' Install it once with the 3 steps below.'
-  const upd = x.version && x.latest && older(x.version, x.latest) ? `<br><i class="fa-solid fa-circle-up ic-accent"></i> A newer extension (v${esc(x.latest)}) is ready: open ${esc((x.browser || 'chrome').toLowerCase().includes('edge') ? 'edge' : 'chrome')}://extensions and click the reload icon on RS Downloader.` : ''
+  const upd = x.version && x.latest && older(x.version, x.latest) ? `<br><i class="fa-solid fa-circle-up ic-accent"></i> ${t('A newer extension (v{0}) is ready: open {1}://extensions and click the reload icon on RS Downloader.', esc(x.latest), (x.browser || 'chrome').toLowerCase().includes('edge') ? 'edge' : 'chrome')}` : ''
   return tag + who + upd
 }
 async function extCheck() {
@@ -455,7 +456,7 @@ async function browserList(box) {
     busy(b, true)
     const x = await call('ext-setup', {name: b.dataset.b})
     busy(b, false)
-    x.ok ? rsPop({icon: 'info', title: `Finish in ${b.dataset.b}`, text: `${b.dataset.b} opened **${x.page}** and the extension folder.\n1. Turn on **Developer mode** (top right).\n2. Click **Load unpacked**.\n3. Paste the folder path (already copied) and click **Select Folder**.\nRS Downloader shows Installed here as soon as it is added.`}) : rsErr(x.msg, 'Could not open the browser')
+    x.ok ? rsPop({icon: 'info', title: `Finish in ${b.dataset.b}`, text: t('{0} opened **{1}** and the extension folder.\n1. Turn on **Developer mode** (top right).\n2. Click **Load unpacked**.\n3. Paste the folder path (already copied) and click **Select Folder**.\nRS Downloader shows Installed here as soon as it is added.', b.dataset.b, x.page)}) : rsErr(x.msg, 'Could not open the browser')
   }
 }
 // first run: offer the extension once, after the engines are ready
@@ -465,7 +466,7 @@ async function firstRunExt() {
   if (x.state !== 'none') return ls('rsdl_extAsked', '1')
   ls('rsdl_extAsked', '1')
   const d = dlg({title: 'Add RS Downloader to your browser', icon: 'fa-puzzle-piece', width: 560, body: `
-    <p>Get a <b>Download this video</b> button on every video, quality list right on the page, and browser downloads caught automatically.</p>
+    <p>${t('Get a <b>Download this video</b> button on every video, quality list right on the page, and browser downloads caught automatically.')}</p>
     <div class="brw"></div>`, foot: '<button type="button" class="btn btn-light" data-x>Later</button>'})
   browserList(d.q('.brw'))
 }
@@ -506,7 +507,7 @@ async function del(ids) {
   if (qids.length && !hids.length) return cancelQ(qids)
   const one = hids.length === 1 && S.rows.find(x => x.id === hids[0])
   const ok = await rsPop.confirm({danger: true, yes: 'Delete', title: one ? 'Delete this download?' : `Delete ${hids.length} downloads?`,
-    text: `${one ? `**${one.title}**\n` : ''}The file${one?.count === 1 ? '' : 's'} will be removed from your PC (moved to the Recycle Bin) and from this list.${qids.length ? `\n${qids.length} unfinished download(s) are cancelled too.` : ''}`})
+    text: `${one ? `**${raw(one.title)}**\n` : ''}${t(one?.count === 1 ? 'The file will be removed from your PC (moved to the Recycle Bin) and from this list.' : 'The files will be removed from your PC (moved to the Recycle Bin) and from this list.')}${qids.length ? '\n' + t('{0} unfinished download(s) are cancelled too.', qids.length) : ''}`})
   if (!ok) return
   const r = await write('Deleting...', async () => { qids.length && await call('q:cancel', {qids}); return call('delete', {ids: hids}) })
   r.ok ? rsOk(r.gone ? `${r.gone} file${r.gone > 1 ? 's' : ''} moved to the Recycle Bin` : 'Removed from the list') : rsErr(r.msg, 'Not deleted')
@@ -523,6 +524,8 @@ async function options(focus) {
   const d = dlg({title: 'RS Downloader Configuration', icon: 'fa-gear', width: 600, body: `
     <div class="tabs" role="tablist">${OPT_TABS.map(([k, l]) => `<button type="button" role="tab" data-t="${k}">${l}</button>`).join('')}</div>
     <div class="tabp" data-p="gen">
+      <div class="grp-h"><i class="fa-solid fa-language"></i> Language</div>
+      <div translate="no">${seg('lang', RSI18N.LANGS, RSI18N.lang)}</div>
       <div class="grp-h"><i class="fa-solid fa-desktop"></i> Windows integration</div>
       ${chk('startup', c.startup, 'Launch RS Downloader on Windows startup (opens in the tray)')}
       ${chk('tray', c.tray !== false, 'Keep running in the tray when the window is closed')}
@@ -550,7 +553,7 @@ async function options(focus) {
     <div class="tabp" data-p="ext">
       <div class="grp-h"><i class="fa-solid fa-puzzle-piece"></i> Add RS Downloader to your browsers</div>
       <div class="brw" id="brwList"><div class="hint">Looking for browsers...</div></div>
-      <p class="hint">Install opens that browser's extensions page and the extension folder (its path is already copied). There: turn on <b>Developer mode</b>, click <b>Load unpacked</b>, paste the path, Select Folder. Done.</p>
+      <p class="hint">${t('Install opens that browser\'s extensions page and the extension folder (its path is already copied). There: turn on <b>Developer mode</b>, click <b>Load unpacked</b>, paste the path, Select Folder. Done.')}</p>
     </div>
     <div class="tabp" data-p="sched">
       <div class="row">${chk('', c.sched?.on, 'Start the queue every day at', 'opSchedOn')}<input class="in time" id="opTime" type="time" value="${esc(c.sched?.time || '02:00')}"></div>
@@ -584,6 +587,7 @@ async function options(focus) {
     if (r.ok) { tr.querySelector('input').value = r.dir; tr.querySelector('[data-a="reset"]').disabled = !r.custom }
   })
   d.body.querySelectorAll('[data-k]').forEach(t => t.addEventListener('change', () => setCfg(t.dataset.k, t.checked).then(() => t.dataset.k === 'sort' && options.refreshCats())))
+  d.q('[data-seg="lang"]').addEventListener('change', () => setLang(segVal(d.el, 'lang')))
   d.q('[data-seg="rate"]').addEventListener('change', () => setCfg('rate', segVal(d.el, 'rate')))
   d.q('[data-seg="maxAt"]').addEventListener('change', () => setCfg('maxAt', +segVal(d.el, 'maxAt')))
   d.q('[data-seg="conns"]').addEventListener('change', () => setCfg('conns', +segVal(d.el, 'conns')))
@@ -635,6 +639,11 @@ function setTheme(t, save) {
   document.body.classList.toggle('dark-mode', t === 'dark')
   ls('rsdl_theme', t)
   save && call('set', {key: 'theme', value: t})
+}
+// new language = the window opens again in it (tray, notifications and other windows follow)
+async function setLang(l) {
+  if (!l || l === RSI18N.lang || !(await setCfg('lang', l))) return
+  RSI18N.save(l) && location.reload()
 }
 async function pasteGo() { const c = await call('paste'); /^https?:\/\//i.test(c.text || '') ? probeOpen(c.text, false) : rsPop.toast('No link in the clipboard', 'info') }
 
@@ -730,6 +739,8 @@ document.addEventListener('drop', e => {
   $('cats').hidden = ls('rsdl_cats') === '0'
   const r = await read(() => call('boot'))
   S.cfg = r.cfg || {}; S.version = r.version || ''; S.packaged = !!r.packaged; S.engine = r.engine; S.q = r.items || []; S.qRun = r.run
+  // language set in main (or first run from the Windows language) wins
+  if (S.cfg.lang && S.cfg.lang !== RSI18N.lang && RSI18N.save(S.cfg.lang)) return location.reload()
   setTheme(S.cfg.theme)
   showUpd(r.upd)
   await loadRows()

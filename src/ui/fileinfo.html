@@ -15,6 +15,8 @@
 </head>
 <body>
   <script src="boot-theme.js"></script>
+  <script src="../i18n/strings.js"></script>
+  <script src="../i18n/i18n.js"></script>
   <div class="fi" id="fi">
     <div class="fi-form">
       <label class="l" for="fUrl">URL</label>
@@ -32,7 +34,7 @@
       <span class="l"></span>
       <div class="f rem">
         <label class="chk"><input type="checkbox" id="fRem"><span id="fRemTxt">Remember this path for "Video" category</span></label>
-        <input id="fCatDir" readonly tabindex="-1">
+        <input id="fCatDir" translate="no" readonly tabindex="-1">
       </div>
 
       <label class="l" for="fDesc">Description</label>
@@ -54,7 +56,7 @@
     <aside class="fi-side">
       <div class="pic" id="pic"><i class="fa-solid fa-file-video"></i></div>
       <b id="sideMain">-</b>
-      <small id="sideSub"></small>
+      <small id="sideSub" translate="no"></small>
     </aside>
   </div>
 

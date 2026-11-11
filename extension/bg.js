@@ -4,6 +4,7 @@
  * YouTube: https://www.youtube.com/@rameezimdad (Subscribe for more!)
  */
 // talks only to the RS Downloader app on this PC
+importScripts('i18n.js')
 const API = 'http://127.0.0.1:47321'
 const H = {'X-RS-Downloader': '1'}
 const MEDIA = /^https?:\/\/([a-z0-9-]+\.)*(youtube\.com|youtu\.be|x\.com|twitter\.com|instagram\.com|tiktok\.com|facebook\.com|fb\.watch|vimeo\.com|reddit\.com|redd\.it|pinterest\.[a-z.]+|pin\.it|threads\.(net|com)|twitch\.tv|soundcloud\.com|dailymotion\.com)(\/|$)/i
@@ -15,7 +16,12 @@ const timeout = ms => AbortSignal.timeout(ms)
 const BROWSER = (navigator.userAgentData?.brands || []).map(b => b.brand).find(b => /Edge|Opera|Brave|Vivaldi|Chrome/.test(b))?.replace('Google ', '').replace('Microsoft ', '') || 'Chrome'
 const who = () => `?b=${encodeURIComponent(BROWSER)}&v=${encodeURIComponent(chrome.runtime.getManifest().version)}`
 async function ping() {
-  try { return (await fetch(API + '/ping' + who(), {headers: H, signal: timeout(1200)})).ok } catch { return false }
+  try {
+    const r = await fetch(API + '/ping' + who(), {headers: H, signal: timeout(1200)})
+    // the app's language: menus, page bar and popup follow it
+    r.ok && r.clone().json().then(j => { if (j.lang && j.lang !== RST.lang()) { RST.set(j.lang); chrome.storage.local.set({lang: j.lang}); menus() } }).catch(() => {})
+    return r.ok
+  } catch { return false }
 }
 // heartbeat: app shows "extension connected" while the browser is open
 chrome.alarms.create('hello', {periodInMinutes: 1})
@@ -39,12 +45,12 @@ async function headersFor(url, referrer = '') {
   headers['User-Agent'] = navigator.userAgent
   return headers
 }
-const OFF = 'RS Downloader is not running. Open the app and try again.'
+const OFF = () => RST.T('RS Downloader is not running. Open the app and try again.')
 async function post(path, body, ms = 4000) {
   try {
     const r = await fetch(API + path, {method: 'POST', headers: {...H, 'Content-Type': 'application/json'}, body: JSON.stringify(body), signal: timeout(ms)})
-    return r.ok ? await r.json() : {ok: false, msg: OFF}
-  } catch (e) { return {ok: false, msg: e?.name === 'TimeoutError' ? 'Reading this video took too long. Try again.' : OFF} }
+    return r.ok ? await r.json() : {ok: false, msg: OFF()}
+  } catch (e) { return {ok: false, msg: e?.name === 'TimeoutError' ? RST.T('Reading this video took too long. Try again.') : OFF()} }
 }
 async function send(url, referrer = '', filename = '') {
   const r = await post('/add', {url, filename, headers: await headersFor(url, referrer)})
@@ -55,18 +61,21 @@ async function send(url, referrer = '', filename = '') {
 // open tabs get the new page script at once (no refresh needed after install / update)
 async function injectOpenTabs() {
   for (const t of await chrome.tabs.query({url: ['http://*/*', 'https://*/*']})) {
-    chrome.scripting.executeScript({target: {tabId: t.id, allFrames: true}, files: ['content.js']}).catch(() => {})
+    chrome.scripting.executeScript({target: {tabId: t.id, allFrames: true}, files: ['i18n.js', 'content.js']}).catch(() => {})
   }
 }
 chrome.runtime.onInstalled.addListener(() => {
   ping()
   injectOpenTabs()
-  chrome.contextMenus.removeAll(() => {
-    chrome.contextMenus.create({id: 'link', title: 'Download link with RS Downloader', contexts: ['link']})
-    chrome.contextMenus.create({id: 'media', title: 'Download this with RS Downloader', contexts: ['video', 'audio', 'image']})
-    chrome.contextMenus.create({id: 'page', title: 'Download the video on this page', contexts: ['page']})
-  })
+  RST.ready().then(menus)
 })
+function menus() {
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({id: 'link', title: RST.T('Download link with RS Downloader'), contexts: ['link']})
+    chrome.contextMenus.create({id: 'media', title: RST.T('Download this with RS Downloader'), contexts: ['video', 'audio', 'image']})
+    chrome.contextMenus.create({id: 'page', title: RST.T('Download the video on this page'), contexts: ['page']})
+  })
+}
 chrome.contextMenus.onClicked.addListener((info, tab) => {
   const page = tab?.url || ''
   const url = info.menuItemId === 'link' ? info.linkUrl : info.menuItemId === 'media' && /^https?:/.test(info.srcUrl || '') && !MEDIA.test(page) ? info.srcUrl : page

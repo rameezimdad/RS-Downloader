@@ -63,6 +63,13 @@ input[readonly] { background: color-mix(in srgb, var(--text-primary) 4%, var(--i
 @media (max-width: 640px) { .fi-side { display: none; } .btn { min-width: 0; flex: 1; } }
 a, button { text-decoration: none !important; }
 
+/* right to left (Arabic, Urdu); link + path boxes stay left to right */
+[dir="rtl"] .l { text-align: left; }
+[dir="rtl"] .seg button { border-right: 0; border-left: 1px solid var(--border-color); }
+[dir="rtl"] .seg button:last-child { border-left: 0; }
+[dir="rtl"] .dd-it em { margin-left: 0; margin-right: auto; }
+[dir="rtl"] #fUrl, [dir="rtl"] #fSave, [dir="rtl"] #fCatDir, [dir="rtl"] .t { direction: ltr; }
+
 /* no scrollbars */
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }

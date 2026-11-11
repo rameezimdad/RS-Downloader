@@ -34,7 +34,7 @@ $('foot').addEventListener('click', async e => {
   if (r && !r.ok && r.msg) { $('msg').hidden = false; $('msg').textContent = r.msg }
 })
 
-const setTitle = () => (document.title = W.state === 'done' ? `Download complete - ${$('name').textContent}` : `${W.p.total ? Math.floor(W.p.pct) + '% ' : ''}${$('name').textContent}`)
+const setTitle = () => (document.title = W.state === 'done' ? t('Download complete - {0}', $('name').textContent) : `${W.p.total ? Math.floor(W.p.pct) + '% ' : ''}${$('name').textContent}`)
 function bar(pct, text, indet) {
   $('bar').classList.toggle('indet', !!indet)
   $('bar').querySelector('.fill').style.width = indet ? '' : Math.min(100, pct || 0).toFixed(1) + '%'
@@ -104,7 +104,7 @@ function failed(err) {
   bar(W.p.pct, 'Stopped')
   $('msg').hidden = false; $('msg').textContent = err || 'The download failed.'
   buttons([['close', 'fa-xmark', 'Close', 'mr-auto'], ['cancel', 'fa-trash-can', 'Remove', 'btn-danger'], ['resume', 'fa-rotate-right', 'Try again', 'btn-primary']])
-  document.title = `Failed - ${$('name').textContent}`
+  document.title = t('Failed - {0}', $('name').textContent)
 }
 window.rs.on('pw:state', s => s.status === 'paused' ? paused() : s.status === 'failed' ? failed(s.err) : s.status === 'queued' && (W.state = 'queued', $('status').textContent = 'Waiting for a free slot...', $('ico').className = 'pw-ico', $('msg').hidden = true))
 

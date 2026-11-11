@@ -52,6 +52,13 @@ body { margin: 0; font: 12.5px/1.4 'Segoe UI', -apple-system, Roboto, sans-serif
 @media (prefers-reduced-motion: reduce) { .pw-bar.indet .fill { animation: none; } .pw-bar .fill { transition: none; } }
 a, button { text-decoration: none !important; }
 
+/* right to left (Arabic, Urdu) */
+[dir="rtl"] .pw-pct { text-align: left; }
+[dir="rtl"] .pw-stats > div + div { border-left: 0; border-right: 1px solid var(--border-light); }
+[dir="rtl"] .mr-auto { margin-right: 0; margin-left: auto; }
+[dir="rtl"] #url { direction: ltr; }
+@media (max-width: 480px) { [dir="rtl"] .pw-stats > div:nth-child(3) { border-right: 0; } }
+
 /* no scrollbars */
 * { scrollbar-width: none; }
 *::-webkit-scrollbar { display: none; width: 0; height: 0; }
